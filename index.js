@@ -4,8 +4,8 @@ Ver 2: Adding the second api to support /api/courses endpoint and using lambda f
 Ver 3: Using Req Params..
 Ver 4: request params object
 Ver 5: Query Params
+Ver 6 :using courses array and req param using http status code
 */
-
 const express = require('express');
 const app = express();
 var courses = [
@@ -21,12 +21,9 @@ app.get("/api/courses",(req,res)=>{
 })
 
 app.get("/api/courses/:id",(req,res)=>{
-  res.send(req.params.id);
-});
-
-app.get("/api/posts/:year/:month",(req,res)=>{
-  //res.send(req.params);//output of : /api/posts/2018/5 => {"year":"2018","month":"5"}
-  res.send(req.query);//output of : /api/posts/2018/5?sortBy=name => {"sortBy":"name"}
+  const course = courses.find(c=>c.id === parseInt(req.params.id));
+  if(!course) res.status(404).send(`course with id: ${req.params.id} not found`);
+  res.send(course);
 });
 
 const PORT = process.env.PORT || 3000;
