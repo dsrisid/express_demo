@@ -5,7 +5,8 @@ Ver 3: Using Req Params..
 Ver 4: request params object
 Ver 5: Query Params
 Ver 6 :using courses array and req param using http status code
-Ver 7 :Post and app.use to understand json structures... 
+Ver 7 :Post and app.use to understand json structures...
+Ver 8: basic data validation
 */
 const express = require('express');
 const app = express();
@@ -31,6 +32,10 @@ app.get("/api/courses/:id",(req,res)=>{
 });
 
 app.post("/api/courses",(req,res)=>{
+  if(!req.body.name || req.body.name.length < 3){
+    res.status(400).send("Name is required and should be minimum three characters");
+    return;
+  }
   const course = {"id":courses.length+1,"name":req.body.name}
   courses.push(course);
   res.send(course)
