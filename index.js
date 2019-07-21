@@ -8,6 +8,7 @@ Ver 6 :using courses array and req param using http status code
 Ver 7 :Post and app.use to understand json structures...
 Ver 8: basic data validation
 Ver 9: Using @hapi/joi module for data validation
+Ver 10:object destructuring feature
 */
 const express = require('express');
 const app = express();
@@ -33,22 +34,43 @@ app.get("/api/courses/:id",(req,res)=>{
 });
 
 app.post("/api/courses",(req,res)=>{
-  const schema = Joi.object().keys({
-    name:Joi.string().min(3).required()
-  });
-  const result = Joi.validate(req.body,schema);
-  // if(!req.body.name || req.body.name.length < 3){
-  //   res.status(400).send("Name is required and should be minimum three characters");
-  //   return;
-  // }
+  const result = validateCourse(req.body);
   if(result.error){
     res.status(400).send("Name is required and should be minimum three characters");
     return;
   }
-  const course = {"id":courses.length+1,"name":req.body.name}
+  const course = {"id":courses.length+1, "name":req.body.name};
   courses.push(course);
   res.send(course)
 });
 
+app.put("/api/courses/:id",(req,res)=>{
+  const course = courses.find(c => c.id === parseInt(req.params.id));
+  if(!course){
+    res.status(404).send(`course with id ${req.params.id} is not found`);
+    return;
+  }
+
+  // const result = validateCourse(course);
+  // if(result.error){
+  //   res.status(400).send(result.error.details[0].message);
+  //   return;
+  // }
+  const {error} = validateCourse(req.body);//Instead of using the whole object as we are interested in only the error
+  //property we could get that by the above notation...This is called object destructuring feature.
+  if(error){
+    res.status(400).send(error.details[0].message);
+    return;
+  }
+  course.name = req.body.name;
+  res.send(course)
+});
+
+function validateCourse(course){
+  const schema = Joi.object().keys({
+    name:Joi.string().min(3).required()
+  });
+  return Joi.validate(course,schema);
+}
 const PORT = process.env.PORT || 3000;
 app.listen(PORT,()=>console.log(`Listening on port ${PORT}....`));
