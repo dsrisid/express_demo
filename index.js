@@ -9,6 +9,7 @@ Ver 7 :Post and app.use to understand json structures...
 Ver 8: basic data validation
 Ver 9: Using @hapi/joi module for data validation
 Ver 10:object destructuring feature
+Ver 11: refactoring post and Delete handle
 */
 const express = require('express');
 const app = express();
@@ -64,6 +65,18 @@ app.put("/api/courses/:id",(req,res)=>{
   }
   course.name = req.body.name;
   res.send(course)
+});
+
+app.delete("/api/courses/:id",(req,res)=>{
+  const course = courses.find(c => c.id === parseInt(req.params.id));
+  if(!course){
+    res.status(404).send(`course with id ${req.params.id} is not found`);
+    return;
+  }
+  const index = courses.indexOf(course);
+  courses.splice(index,1);
+  res.send(course);
+
 });
 
 function validateCourse(course){
